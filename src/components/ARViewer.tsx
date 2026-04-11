@@ -11,7 +11,7 @@ import Joystick from './Joystick';
 import { io, Socket } from 'socket.io-client';
 
 // Raw URL to the GLB file on GitHub
-const MODEL_URL = 'https://raw.githubusercontent.com/MauroCasarin/LOLA-RA26/main/LOLA-GLB.glb';
+const MODEL_URL = '/LOLA-GLB.glb';
 
 const LASER_GEO = new THREE.CylinderGeometry(0.005, 0.005, 0.1, 8);
 LASER_GEO.translate(0, 0.05, 0);
