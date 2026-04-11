@@ -1,0 +1,7 @@
+{
+  "name": "LOLA Multijugador",
+  "description": "Visualizador de realidad aumentada para modelos 3D",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
