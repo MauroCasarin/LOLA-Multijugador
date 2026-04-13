@@ -30,10 +30,12 @@ async function startServer() {
   }>();
 
   const playerPositions = new Map<string, { x: number, y: number, z: number }>();
+  const playerEnergy = new Map<string, number>();
 
   // --- FASE 1: LÓGICA DEL SERVIDOR MULTIJUGADOR ---
   io.on("connection", (socket) => {
     console.log("🟢 Un jugador se ha conectado:", socket.id);
+    playerEnergy.set(socket.id, 100);
 
     // Unirse a una sala específica
     socket.on("join-room", ({ roomId, playerName }) => {
@@ -103,7 +105,7 @@ async function startServer() {
       socket.emit("sync-items", Array.from(room.items.values()));
 
       // Avisar a los demás en la sala
-      socket.to(roomId).emit("player-joined", { id: socket.id, playerName });
+      socket.to(roomId).emit("player-joined", { id: socket.id, playerName, energy: playerEnergy.get(socket.id) });
     });
 
     // Escuchar cuando este jugador se mueve
@@ -136,8 +138,17 @@ async function startServer() {
     socket.on("player-hit", (targetId) => {
       const roomId = socket.data.roomId;
       if (roomId) {
-        // Emitir a toda la sala quién fue golpeado y por quién
-        io.to(roomId).emit("player-hit", { targetId, shooterId: socket.id });
+        // Reducir energía
+        const energy = (playerEnergy.get(targetId) || 100) - 10;
+        playerEnergy.set(targetId, Math.max(0, energy));
+        
+        // Emitir a toda la sala quién fue golpeado y por quién, y su nueva energía
+        io.to(roomId).emit("player-hit", { targetId, shooterId: socket.id, energy });
+        
+        if (energy <= 0) {
+          io.to(roomId).emit("player-eliminated", { targetId, shooterId: socket.id });
+          playerEnergy.set(targetId, 100); // Reset energy
+        }
       }
     });
 
@@ -166,6 +177,7 @@ async function startServer() {
     socket.on("disconnect", () => {
       console.log("🔴 Un jugador se ha desconectado:", socket.id);
       playerPositions.delete(socket.id);
+      playerEnergy.delete(socket.id);
       const roomId = socket.data.roomId;
       if (roomId) {
         // Avisar a los demás que se desconectó

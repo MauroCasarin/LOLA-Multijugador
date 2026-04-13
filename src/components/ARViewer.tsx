@@ -22,17 +22,17 @@ function createTextSprite(message: string) {
   const context = canvas.getContext('2d');
   if (!context) return new THREE.Sprite();
   
-  canvas.width = 512;
-  canvas.height = 128;
+  canvas.width = 1024;
+  canvas.height = 256;
   
   context.fillStyle = 'rgba(0, 0, 0, 0.6)';
-  context.fillRect(0, 0, 512, 128);
+  context.fillRect(0, 0, 1024, 256);
   
-  context.font = 'bold 60px sans-serif';
+  context.font = 'bold 120px sans-serif';
   context.fillStyle = 'white';
   context.textAlign = 'center';
   context.textBaseline = 'middle';
-  context.fillText(message, 256, 64);
+  context.fillText(message, 512, 128);
   
   const texture = new THREE.CanvasTexture(canvas);
   const spriteMaterial = new THREE.SpriteMaterial({ map: texture, depthTest: false });
@@ -347,7 +347,7 @@ export default function ARViewer({ roomId, playerName, playerColor }: ARViewerPr
     socket.on('player-hit', ({ targetId, shooterId }) => {
       if (targetId === socket.id) {
         setHealth(h => {
-          const newHealth = Math.max(0, h - 20);
+          const newHealth = Math.max(0, h - 10);
           if (newHealth === 0 && h > 0) {
             setIsDead(true);
             const sName = shooterId === socket.id ? playerName : (playerNamesRef.current.get(shooterId) || 'Jugador');
@@ -579,13 +579,11 @@ export default function ARViewer({ roomId, playerName, playerColor }: ARViewerPr
         setCarPlaced(true);
         reticle.visible = false;
         
-        // Agregar sprite de nombre propio proporcional
+        // Agregar sprite de nombre propio
         const nameSprite = createTextSprite(playerName);
-        // Calculamos la escala local para que el sprite mida exactamente 15cm de ancho en el mundo real
-        const localWidth = 0.15 / initialScale.current;
-        const localHeight = 0.04 / initialScale.current;
-        nameSprite.scale.set(localWidth, localHeight, 1);
-        nameSprite.position.y = 0.15 / initialScale.current; // 15cm arriba del centro del auto
+        // Escala fija para que el nombre sea legible y consistente
+        nameSprite.scale.set(0.4, 0.12, 1);
+        nameSprite.position.y = 0.3; // 30cm arriba del centro del auto
         modelRef.current.add(nameSprite);
 
         // Emitir posición inicial al colocar el auto
