@@ -171,7 +171,7 @@ export default function ARViewer({ roomId, playerName, playerColor }: ARViewerPr
     
     const direction = new THREE.Vector3();
     modelRef.current.getWorldDirection(direction);
-    direction.negate(); // El frente del auto es -Z local
+    direction; // El frente del auto es -Z local
     
     const position = new THREE.Vector3();
     modelRef.current.getWorldPosition(position);
