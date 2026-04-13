@@ -1024,10 +1024,13 @@ export default function ARViewer({ roomId, playerName, playerColor }: ARViewerPr
       const shadowGeometry = new THREE.PlaneGeometry(size.x * 1.5, size.z * 1.5);
       const shadowMesh = new THREE.Mesh(shadowGeometry, shadowMaterial);
       shadowMesh.rotation.x = -Math.PI / 2;
-      shadowMesh.position.y = 0.01; // Slightly above ground to avoid z-fighting
+      shadowMesh.position.y = 0.001; // Just slightly above ground
       
       wrapper.add(shadowMesh);
       shadowMeshRef.current = shadowMesh;
+      
+      // Position the wrapper so the bottom of the model is at Y=0
+      wrapper.position.y = 0;
       
       // Scale wrapper to a reasonable size (e.g., 30cm)
       const maxDim = Math.max(size.x, size.y, size.z);
