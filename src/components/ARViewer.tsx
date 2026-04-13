@@ -996,9 +996,10 @@ export default function ARViewer({ roomId, playerName, playerColor }: ARViewerPr
       model.position.x = -center.x;
       model.position.y = -box.min.z; // Align based on new Up axis
       model.position.z = -center.y; // Align based on new Forward axis
-      model.userData.baseY = -box.min.z;
+      model.userData.baseY = 0; // Ensure base is at 0 for the wrapper
       
       wrapper.add(model);
+      wrapper.position.y = 0; // Ensure wrapper is at ground level
       innerModelRef.current = model;
 
       // Create Fake Shadow (Zero performance cost)
