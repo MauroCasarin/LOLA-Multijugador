@@ -127,6 +127,8 @@ export default function ARViewer({ roomId, playerName, playerColor }: ARViewerPr
   const initialDistance = useRef<number | null>(null);
   const initialScale = useRef<number>(1);
   const speedMultiplierRef = useRef<number>(1);
+  const velocityRef = useRef<number>(0);
+  const angularVelocityRef = useRef<number>(0);
   const iocModeRef = useRef<boolean>(false);
   const socketRef = useRef<Socket | null>(null);
   const lastEmitTimeRef = useRef<number>(0);
@@ -708,7 +710,17 @@ export default function ARViewer({ roomId, playerName, playerColor }: ARViewerPr
             }
           } else {
             // --- STANDARD MODE ---
-            const moveZ = -y * speed;
+            const damping = 0.92;
+            const acceleration = 0.003 * speedMultiplierRef.current;
+            const turnAcceleration = 0.003 * speedMultiplierRef.current;
+
+            velocityRef.current += (-y * acceleration);
+            angularVelocityRef.current += (-x * turnAcceleration);
+
+            velocityRef.current *= damping;
+            angularVelocityRef.current *= damping;
+
+            const moveZ = velocityRef.current;
             
             const forwardDir = new THREE.Vector3();
             modelRef.current.getWorldDirection(forwardDir);
@@ -733,10 +745,10 @@ export default function ARViewer({ roomId, playerName, playerColor }: ARViewerPr
               distanceTraveledRef.current += Math.abs(moveZ);
             }
             
-            modelRef.current.rotateY(-x * turnSpeed);
-            steerAngle = -x * 0.5;
-            targetTilt = (x * 0.2);
-            targetPitch = (y * 0.1);
+            modelRef.current.rotateY(angularVelocityRef.current);
+            steerAngle = -angularVelocityRef.current * 10;
+            targetTilt = (angularVelocityRef.current * 5);
+            targetPitch = (velocityRef.current * 2);
           }
 
           // Check item collisions
