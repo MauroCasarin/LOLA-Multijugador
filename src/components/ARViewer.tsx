@@ -670,7 +670,7 @@ export default function ARViewer({ roomId, playerName, playerColor }: ARViewerPr
               const camRight = new THREE.Vector3(-camForward.z, 0, camForward.x);
 
               const moveDir = new THREE.Vector3()
-                .addScaledVector(camForward, -y)
+                .addScaledVector(camForward, y)
                 .addScaledVector(camRight, x);
 
               if (moveDir.lengthSq() > 0.001) {
@@ -987,10 +987,16 @@ export default function ARViewer({ roomId, playerName, playerColor }: ARViewerPr
       const center = box.getCenter(new THREE.Vector3());
       
       // Center the model inside the wrapper, aligning bottom to Y=0
+      // User's axis setup: Green=Forward (Y), Red=Right (X), Blue=Up (Z)
+      // Three.js standard: Forward=-Z, Up=Y, Right=X
+      // Apply rotation to align user's axes to Three.js standard
+      model.rotation.x = -Math.PI / 2; // Rotate so Blue(Z) becomes Up(Y)
+      model.rotation.y = 0; // Adjust if needed
+      
       model.position.x = -center.x;
-      model.position.y = -box.min.y;
-      model.position.z = -center.z;
-      model.userData.baseY = -box.min.y;
+      model.position.y = -box.min.z; // Align based on new Up axis
+      model.position.z = -center.y; // Align based on new Forward axis
+      model.userData.baseY = -box.min.z;
       
       wrapper.add(model);
       innerModelRef.current = model;
