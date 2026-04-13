@@ -297,11 +297,10 @@ export default function ARViewer({ roomId, playerName, playerColor }: ARViewerPr
         
         // Agregar nombre proporcional al tamaño del auto
         const nameSprite = createTextSprite(remotePlayerName || 'Piloto');
-        // Calculamos la escala local para que el sprite mida exactamente 15cm de ancho en el mundo real
-        const localWidth = 0.15 / initialScale.current;
-        const localHeight = 0.04 / initialScale.current;
-        nameSprite.scale.set(localWidth, localHeight, 1);
-        nameSprite.position.y = 0.15 / initialScale.current; // 15cm arriba del centro del auto
+        // Escala fija para que el nombre sea legible y consistente
+        nameSprite.scale.set(0.6, 0.2, 1);
+        nameSprite.position.y = 0.4; // 40cm arriba del centro del auto
+        nameSprite.renderOrder = 1000; // Asegurar que se renderice encima
         remotePlayer.add(nameSprite);
         
         sceneRef.current.add(remotePlayer);
@@ -582,8 +581,9 @@ export default function ARViewer({ roomId, playerName, playerColor }: ARViewerPr
         // Agregar sprite de nombre propio
         const nameSprite = createTextSprite(playerName);
         // Escala fija para que el nombre sea legible y consistente
-        nameSprite.scale.set(0.4, 0.12, 1);
-        nameSprite.position.y = 0.3; // 30cm arriba del centro del auto
+        nameSprite.scale.set(0.6, 0.2, 1);
+        nameSprite.position.y = 0.4; // 40cm arriba del centro del auto
+        nameSprite.renderOrder = 1000; // Asegurar que se renderice encima
         modelRef.current.add(nameSprite);
 
         // Emitir posición inicial al colocar el auto
@@ -670,7 +670,7 @@ export default function ARViewer({ roomId, playerName, playerColor }: ARViewerPr
               const camRight = new THREE.Vector3(-camForward.z, 0, camForward.x);
 
               const moveDir = new THREE.Vector3()
-                .addScaledVector(camForward, y)
+                .addScaledVector(camForward, -y)
                 .addScaledVector(camRight, x);
 
               if (moveDir.lengthSq() > 0.001) {
@@ -910,9 +910,18 @@ export default function ARViewer({ roomId, playerName, playerColor }: ARViewerPr
       renderer.setSize(window.innerWidth, window.innerHeight);
     };
     window.addEventListener('resize', handleResize);
+    
+    // Cerrar menú al hacer clic en el aire
+    const handleCanvasClick = (event: MouseEvent) => {
+      if (showMenu && !(event.target as HTMLElement).closest('.menu-container')) {
+        setShowMenu(false);
+      }
+    };
+    renderer.domElement.addEventListener('click', handleCanvasClick);
 
     return () => {
       window.removeEventListener('resize', handleResize);
+      renderer.domElement.removeEventListener('click', handleCanvasClick);
       if (containerRef.current) {
         containerRef.current.removeChild(renderer.domElement);
       }
